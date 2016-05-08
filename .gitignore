@@ -1,5 +1,7 @@
 .ipynb_checkpoints/
 nyc_buildings.csv
 nyc_building_nonsales.csv
+nyc_pluto.csv
+nyc_rolling_sales.csv
 .DS_Store
 *.txt
