@@ -5,3 +5,4 @@ nyc_pluto.csv
 nyc_rolling_sales.csv
 .DS_Store
 *.txt
+.idea/
