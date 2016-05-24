@@ -58,6 +58,14 @@
     width:400px;
     border:1px solid black;
 }
+
+#left-button, #right-button {
+    font-size:14px;
+    /*width:40px;*/
+    /*background:lightgreen;*/
+    /*height:50px;*/
+    /*border-width:0*/
+}
 </style>
 
 <!-- Import the scripts. -->
@@ -70,17 +78,19 @@
 <div id="svg_holder">
 </div>
 <br clear="all"/>
-<div style="width:960px;">
-<div id="type_selector_holder" style="width:400px; font-family:Roboto; float:left;"> <!-- margin:0 auto; -->
+<div style="width:800px;">
+<div id="type_selector_holder" style="width:380px; font-family:Roboto; float:left;"> <!-- margin:0
+auto; -->
 </div>
-<div id="entity_selector_holder" style="width:400px; font-family:Roboto; float:right;"> <!-- margin:0 auto; -->
+<div id="entity_selector_holder" style="width:380px; font-family:Roboto; float:right;"> <!--
+ margin:0 auto; -->
 </div>
 </div>
 <script>
 
     // Set plot size parameters and append the SVG.
-    var width = 960,
-       height = 800;
+    var width = 800,
+       height = 500;
 
 
     var svg = d3.select("#svg_holder").append("svg")
@@ -107,8 +117,8 @@
 
         // Set up a projection.
         var proj = d3.geo.mercator()
-                .center([-73.94, 40.70])
-                .scale(80000)
+                .center([-74.04, 40.70])
+                .scale(50000)
                 .translate([(width) / 2, (height)/2]);
 
         var path = d3.geo.path()
@@ -129,8 +139,8 @@
     d3.json("geojson/mepl/Trustees of Columbia.geojson", function(error, columbia) {
 
         var proj = d3.geo.mercator()
-                .center([-73.94, 40.70])
-                .scale(80000)
+                .center([-74.04, 40.70])
+                .scale(50000)
                 .translate([(width) / 2, (height)/2]);
 
         var path = d3.geo.path()
@@ -189,21 +199,22 @@
                 .attr("id", "rank-label");
 
 
-//        // Set up the initial description.
-//        // Because text boxes cannot be fit to a certain width by default in SVG--there's no bounding box!---I elected
-//        // to dump it over it using an absolutely-positioned div.
-          // TODO.
-//        svg.append("text")
-//                .attr({
-//                    "x": 25,
-//                    "y": 65,
-//                    "width": 50,
-//                    "height": 50,
-//                    "font-family": "Roboto",
-//                    "font-size": "12px"
-//                })
-//                .text("Columbia University is the largest landowner in New York City by number of addresses by a long shot, owning 209 properties—twice the number owned properties as the next largest private property-holder, the Duestche Bank National Trust, and almost three times the 72 addresses allotted to the New York Public Library, for comparison. It is also a common candidate in the media for the biggest landowner in New York City, period, and indeed according to the public record the university is first in number, second in size, and third in wealth&mdash;though losing by a sizable margin to NYU on that last count.")
-//                .attr("id", "entity-description");
+        // Set up the description.
+        // Because text boxes cannot be fit to a certain width by default in SVG--there's no bounding box!---I elected
+        // to dump it over it using an absolutely-positioned div.
+        d3.select("#svg_holder")
+                .append("div")
+                .attr("id", "description-text")
+                .style({
+                    "position": "absolute",
+                    "left": "35px",
+                    "top": "100px",
+                    "font-family": "Roboto",
+                    "font-size": "12px",
+                    "width": "350px"
+                })
+                .text("Columbia University is the largest landowner in New York City by number of addresses by a long shot, owning 209 properties—twice the number owned properties as the next largest private property-holder, the Duestche Bank National Trust, and almost three times the 72 addresses allotted to the New York Public Library, for comparison. It is also a common candidate in the media for the biggest landowner in New York City, period, and indeed according to the public record the university is first in number, second in size, and third in wealth—losing by a sizable margin to NYU on that last count.");
+
     });
 
     // Set up the dropdown menu.
@@ -348,7 +359,6 @@
     // This event is called whenever the criteria used for ranking is changed.
     function criteriaChanged() {
         var selectedValue = d3.event.target.value;
-        console.log(selectedValue);
         // Which file we draw the update from depends on which criteria we have listed.
         if (selectedValue == 'Largest') {
             entities
@@ -380,6 +390,10 @@
                         return i + 1 + ". " + wpl[i];
                     });
         }
+        // For convenience's sake, let's set the index when an update is called back to 0.
+        var entity_selection = document.getElementById('entity-type');
+        entity_selection.selectedIndex = 0;
+        // Now we update the selection using the below.
         selectionChanged();
     }
 
@@ -395,11 +409,25 @@
         // var selectedValue = d3.event.target.value;
         // ...as below.
         var selectedIndex = document.getElementById('entity-type').selectedIndex + 1;
+
+        // Reset the buttons if appropriate!
+        if(entity_selection.selectedIndex == 20) {
+             document.getElementById("right-button").disabled = true;
+        }
+        if(entity_selection.selectedIndex == 0) {
+             document.getElementById("left-button").disabled = true;
+        }
+        else {
+             document.getElementById("left-button").disabled = false;
+             document.getElementById("right-button").disabled = false;
+        }
+
         var old_points = d3.selectAll('.location');
         // Reset the old points.
         old_points.remove();
 
 
+        // In order to do any of the rest we need to inspect the ranking type so we map to the correct subdirectory.
         var selection;
         var type_selection = document.getElementById('ranking-type');
         var sel = type_selection.options[type_selection.selectedIndex].value;
@@ -472,8 +500,8 @@
 
 
             var proj = d3.geo.mercator()
-                    .center([-73.94, 40.70])
-                    .scale(80000)
+                    .center([-74.04, 40.70])
+                    .scale(50000)
                     .translate([(width) / 2, (height) / 2]);
             var path = d3.geo.path()
                     .projection(proj);
@@ -510,6 +538,26 @@
 //                    }
         });
 
+        // We need to use a completely different file, descriptions.json, to populate the description text.
+        d3.json("descriptions.json", function (error, desc) {
+            console.log(selectedValue);
+            console.log(desc);
+            // Remove the old text.
+            d3.select("#description-text").remove();
+            // Place a new one!
+            d3.select("#svg_holder")
+                    .append("div")
+                    .attr("id", "description-text")
+                    .style({
+                        "position": "absolute",
+                        "left": "35px",
+                        "top": "100px",
+                        "font-family": "Roboto",
+                        "font-size": "12px",
+                        "width": "350px"
+                    })
+                    .text(desc[selectedValue]);
+        });
 
     }
 
