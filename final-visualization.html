@@ -12,24 +12,66 @@
     display:block;
 }
 .location {
-    fill: blue;
-    stroke: black;
+    fill:black;
     stroke-width:1px;
+    stroke:white;
+    /*filter: drop-shadow( -2px -2px 2px #FFF );*/
+}
+
+.d3-tip {
+    line-height: 1;
+    font-weight: bold;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    border-radius: 2px;
+    font-family: Roboto;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
 }
 </style>
 
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
 <body>
 
 <script>
 
 var width = 960,
-   height = 960;
+   height = 800;
+
 
 var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height);
+
+    var tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .html(function(d) {
+            return d['properties']['address'];
+    });
+
+    svg.call(tip);
 
     var layer1 = svg.append('g');
     var layer2 = svg.append('g');
@@ -54,7 +96,7 @@ var svg = d3.select("body").append("svg")
 
     });
 
-    d3.json("geojson/Trustees of Columbia.geojson", function(error, columbia) {
+    d3.json("geojson/mepl/Trustees of Columbia.geojson", function(error, columbia) {
 
         var proj = d3.geo.mercator()
                 .center([-73.94, 40.70])
@@ -74,27 +116,267 @@ var svg = d3.select("body").append("svg")
                 .attr("cx", function(d) { return proj(d['geometry']['coordinates'])[0]; })
                 .attr("cy", function(d) { return proj(d['geometry']['coordinates'])[1]; })
                 .attr("d", path)
-                .each(pulse);
-
-		function pulse() {
-            var circle = svg.select(".location");
-            console.log(circle);
-            (function repeat() {
-                circle = circle.transition()
-                        .duration(2000)
-                        .attr("stroke-width", 20)
-                        .attr("r", 10)
-                        .transition()
-                        .duration(2000)
-                        .attr('stroke-width', 0.5)
-                        .attr("r", 200)
-                        .ease('sine')
-                        .each("end", repeat);
-            })();
-        }
+                .on('mouseover', tip.show)
+                .on('mouseout', tip.hide);
+//                .each(pulse);
+//
+//		function pulse() {
+//            var circle = svg.selectAll(".location");
+//            (function repeat() {
+//                circle = circle.transition()
+//                        .duration(2000)
+//                        .attr("r", 2)
+//                        .transition()
+//                        .duration(2000)
+//                        .attr("r", 5)
+//                        .ease('sine')
+//                        .each("end", repeat);
+//            })();
+//        }
 
     });
-//    var geoPath = d3.geo.path().projection(proj);
+
+    var dropDown = d3.select("body").append("select")
+            .attr("name", "ranking-type")
+            .attr("id", "ranking-type");
+
+    var options = dropDown.selectAll("option")
+            .data(['Most Enumerate', 'Largest', 'Wealthiest'])
+            .enter()
+            .append("option");
+
+    var lpl = ['Riverbay Corporation',
+            'Trustees Of Columbia',
+            'ST-DIL LLC',
+            'Starrett City, Inc.',
+            'Rochdale Village Inc',
+            'New York University',
+            "St. John's University",
+            'RCPI Landmark Properties LLC',
+            'New York-Presbyterian Hospital',
+            'North Shore Towers Apartments',
+            'Trinity Hudson Holdings',
+            'Parkchester South Condominiums',
+            'New Water Street Corporation',
+            'New York Convention Center Corporation',
+            'Mount Sinai Hospital',
+            '1-10 Bush Terminal Owner LP',
+            'SL Green Realty Corporation',
+            'Queens Fresh Meadows',
+            'PCVST-DIL LLC',
+            'Fordham University'];
+
+    var mepl = ['Trustees Of Columbia',
+                 'Duestche Bank National Trust',
+                 'Spring Creek Nehemaih',
+                 'Northeastern Conference of Seventh-Day Adventists',
+                 'New York University',
+                 'U.S. Bank National Association',
+                 'Consolidated Edison Company',
+                 'Maguire Avenue Realty',
+                 'New York Garden Trust',
+                 'Greater New York Conference of Seventh-day Adventists',
+                 'Housing Partnership Development Corporation',
+                 'Roman Catholic Church',
+                 'Baiano Development LLC',
+                 'Yeshiva University',
+                 'Silvershore Properties',
+                 'Casa Mason Corporation',
+                 'Clinton Graham',
+                 'Mg Richmond LLC',
+                 'Hpeny Housing Development Fund Company',
+                 'Prol Properties Corporation'];
+
+    var wpl = ['New York University',
+             ' RCPI Landmark Properties LLC',
+             'Trustees Of Columbia',
+             'One Bryant Park',
+             '767 Fifth Partnerns LLC',
+             'Nnew York Convention Center Corporation',
+             'BPP ST Owner LLC',
+             'Citifield',
+             'SL Green Realty Corporation',
+             'Arena Nominee Sub B, LLC',
+             '200 Park, L.P.',
+             '1345 Leasehold LLC',
+             'Mount Sinai Hospital',
+             'Trinity Hudson Holdings',
+             'HMC Times Square Hotel LP',
+             'PGREF I 1633 Broadway Tower, L.P.',
+             '1221 Avenue Holdings',
+             'Bop 245 Park LLC',
+             'Solovieff Realty Company',
+             'New York-Presbyterian Hospital'];
+
+
+    options
+            .attr("value", function(d) { console.log(d); return d; })
+            .text(function(d) { return d; });
+
+    var entitySelection = d3.select("body").append("select")
+            .attr("name", "entity-selection");
+
+    var entities = entitySelection.selectAll("option")
+            .data(mepl)
+            .enter()
+            .append("option");
+
+    entities
+            .attr("value", function(d) { console.log(d); return d; })
+            .text(function(d, i) { return i + 1 + ". " + d; });
+
+    dropDown.on("change", criteriaChanged);
+    entitySelection.on("change", selectionChanged);
+
+    function criteriaChanged() {
+        //the name isn't important, but has to match the name
+        //you added to the menu's "change" event listener.
+        var selectedValue = d3.event.target.value;
+        console.log(selectedValue);
+        if (selectedValue == 'Largest') {
+            entities
+                    .attr("value", function (d, i) {
+                        console.log(lpl[i]);
+                        return lpl[i];
+                    })
+                    .text(function (d, i) {
+                        return i + 1 + ". " + lpl[i];
+                    });
+        }
+        if (selectedValue == 'Most Enumerate') {
+            entities
+                    .attr("value", function (d, i) {
+                        console.log(mepl[i]);
+                        return mepl[i];
+                    })
+                    .text(function (d, i) {
+                        return i + 1 + ". " + mepl[i];
+                    });
+        }
+        if (selectedValue == 'Wealthiest') {
+            entities
+                    .attr("value", function (d, i) {
+                        console.log(wpl[i]);
+                        return wpl[i];
+                    })
+                    .text(function (d, i) {
+                        return i + 1 + ". " + wpl[i];
+                    });
+        }
+    }
+
+    function selectionChanged() {
+        //the name isn't important, but has to match the name
+        //you added to the menu's "change" event listener.
+        var selectedValue = d3.event.target.value;
+        console.log(selectedValue);
+        var old_points = d3.selectAll('.location');
+        old_points.remove();
+
+        var selection;
+        var type_selection = document.getElementById('ranking-type');
+        var sel = type_selection.options[type_selection.selectedIndex].value;
+
+        console.log('Type: ' + type_selection);
+        console.log('Selection: ' + sel);
+
+        if (sel == 'Largest') {
+            selection = 'lpl'
+        }
+        if (sel == 'Most Enumerate') {
+            selection = 'mepl'
+        }
+        if (sel == 'Wealthiest') {
+            selection = 'wpl'
+        }
+
+        console.log(selection);
+
+        d3.json("geojson/" + selection + '/' + selectedValue + '.geojson', function (error, ent) {
+
+            console.log(ent);
+
+            var proj = d3.geo.mercator()
+                    .center([-73.94, 40.70])
+                    .scale(80000)
+                    .translate([(width) / 2, (height) / 2]);
+
+            var path = d3.geo.path()
+                    .projection(proj);
+
+            layer2
+                    .attr("id", "locations")
+                    .selectAll(".state")
+                    .data(ent.features)
+                    .enter().append("circle")
+                    .attr("class", "location")
+                    .attr("r", "4px")
+                    .attr("cx", function (d) {
+                        return proj(d['geometry']['coordinates'])[0];
+                    })
+                    .attr("cy", function (d) {
+                        return proj(d['geometry']['coordinates'])[1];
+                    })
+                    .attr("d", path)
+                    .on('mouseover', tip.show)
+                    .on('mouseout', tip.hide);
+
+//                            .each(pulse);
+//
+//            		function pulse() {
+//                        var circle = svg.selectAll(".location");
+//                        (function repeat() {
+//                            circle = circle.transition()
+//                                    .duration(2000)
+//                                    .attr("r", 2)
+//                                    .transition()
+//                                    .duration(2000)
+//                                    .attr("r", 5)
+//                                    .ease('sine')
+//                                    .each("end", repeat);
+//                        })();
+//                    }
+        });
+
+    }
+
+//        var selectedValue = d3.event.target.value;
+//             //get the name of the selected option from the change event object
+//
+//        jsonOutside.features.forEach(function (d) {
+//            // loop through json data to match td entry
+//
+//            if (selectedValue === d.properties.name) {
+//            //for each data object in the features array (d), compare it's
+//            //name against the one you got from the event object
+//            //if they match, then:
+//
+//                alert(selectedValue)  //remove this line when things are working!
+//
+//                click(d); // pass json element that matches selected value to click
+//                 //which will respond the same way as if you clicked the country on
+//                 //the map.
+//            };
+//        })
+
+//    dispatch.on("load.menu", function(stateById) {
+//      var select = d3.select("body")
+//        .append("div")
+//        .append("select")
+//          .on("change", function() { return; });
+//
+//      select.selectAll("option")
+//          .data(stateById.values())
+//        .enter().append("option")
+//          .attr("value", function(d) { return d.id; })
+//          .text(function(d) { return d.id; });
+//
+//      dispatch.on("statechange.menu", function(state) {
+//        select.property("value", state.id);
+//      });
+//    });
+
+
 
 </script>
 </body>
