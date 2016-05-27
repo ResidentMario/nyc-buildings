@@ -8,19 +8,16 @@
     stroke-width: 1px;
     display: block;
 }
-
 .location {
     fill: black;
     stroke-width: 1px;
     stroke: white;
 }
-
 .location:hover {
     fill: white;
     stroke-width: 1px;
     stroke: white;
 }
-
 .d3-tip {
     line-height: 1;
     font-weight: bold;
@@ -30,7 +27,6 @@
     border-radius: 2px;
     font-family: Roboto;
 }
-
 /* Creates a small triangle extender for the tooltip */
 .d3-tip:after {
     box-sizing: border-box;
@@ -43,14 +39,12 @@
     position: absolute;
     text-align: center;
 }
-
 /* Style northward tooltips differently */
 .d3-tip.n:after {
     margin: -1px 0 0 0;
     top: 100%;
     left: 0;
 }
-
 #ranking-type, #entity-type {
     font-family:Roboto;
     padding:10px;
@@ -58,7 +52,6 @@
     width:400px;
     border:1px solid black;
 }
-
 #left-button, #right-button {
     font-size:14px;
     /*width:40px;*/
@@ -87,16 +80,12 @@ auto; -->
 </div>
 </div>
 <script>
-
     // Set plot size parameters and append the SVG.
     var width = 800,
        height = 500;
-
-
     var svg = d3.select("#svg_holder").append("svg")
         .attr("width", width)
         .attr("height", height);
-
     // Set up the display tooltip, needs to be called against the SVG.
     var tip = d3.tip()
         .attr('class', 'd3-tip')
@@ -104,26 +93,20 @@ auto; -->
         .html(function(d) {
             return d['properties']['address'];
     });
-
     svg.call(tip);
-
     // Explicitly call layers in order to always stack points on the map and not the other way around.
     var layer1 = svg.append('g');
     var layer2 = svg.append('g');
-
     // Set up the New York City shape.
     // If you change the scaling factors here be sure to change them for the points below too!
     d3.json("nyc.json", function(error, nyb) {
-
         // Set up a projection.
         var proj = d3.geo.mercator()
                 .center([-74.04, 40.70])
                 .scale(50000)
                 .translate([(width) / 2, (height)/2]);
-
         var path = d3.geo.path()
                 .projection(proj);
-
         // Load and plot the points.
         layer1
                 .attr("id", "boroughs")
@@ -132,20 +115,15 @@ auto; -->
                 .enter().append("path")
                 .attr("class", function(d){ return d.properties.name; })
                 .attr("d", path);
-
     });
-
     // Initially populate the graph using Columbia enumeration values.
     d3.json("geojson/mepl/Trustees of Columbia.geojson", function(error, columbia) {
-
         var proj = d3.geo.mercator()
                 .center([-74.04, 40.70])
                 .scale(50000)
                 .translate([(width) / 2, (height)/2]);
-
         var path = d3.geo.path()
                 .projection(proj);
-
         layer2
                 .attr("id", "locations")
                 .selectAll(".state")
@@ -174,7 +152,6 @@ auto; -->
 //                        .each("end", repeat);
 //            })();
 //        }
-
         // Set up the initial big text label.
         svg.append("text")
                 .attr({
@@ -186,7 +163,6 @@ auto; -->
                 })
                 .text("Trustees of Columbia")
                 .attr("id", "title-label");
-
         // Set up the initial ranking label.
         svg.append("text")
                 .attr({
@@ -197,8 +173,6 @@ auto; -->
                 })
                 .text("Ranked #1 In Number Of Addresses (209)")
                 .attr("id", "rank-label");
-
-
         // Set up the description.
         // Because text boxes cannot be fit to a certain width by default in SVG--there's no bounding box!---I elected
         // to dump it over it using an absolutely-positioned div.
@@ -214,9 +188,7 @@ auto; -->
                     "width": "350px"
                 })
                 .text("Columbia University is the largest landowner in New York City by number of addresses by a long shot, owning 209 properties—twice the number owned properties as the next largest private property-holder, the Duestche Bank National Trust, and almost three times the 72 addresses allotted to the New York Public Library, for comparison. It is also a common candidate in the media for the biggest landowner in New York City, period, and indeed according to the public record the university is first in number, second in size, and third in wealth—losing by a sizable margin to NYU on that last count.");
-
     });
-
     // Set up the dropdown menu.
     var dropDown = d3.select("#type_selector_holder")
             .text("Ranking")
@@ -227,13 +199,10 @@ auto; -->
             .append("select")
             .attr("name", "ranking-type")
             .attr("id", "ranking-type");
-
     var options = dropDown.selectAll("option")
             .data(['Most Enumerate', 'Largest', 'Wealthiest'])
             .enter()
             .append("option");
-
-
     // Will need the data, easiest to just paste it here as a list.
     var lpl = ['Riverbay Corporation',
             'Trustees Of Columbia',
@@ -255,7 +224,6 @@ auto; -->
             'Queens Fresh Meadows',
             'PCVST-DIL LLC',
             'Fordham University'];
-
     var mepl = ['Trustees Of Columbia',
                  'Duestche Bank National Trust',
                  'Spring Creek Nehemaih',
@@ -276,7 +244,6 @@ auto; -->
                  'Mg Richmond LLC',
                  'Hpeny Housing Development Fund Company',
                  'Prol Properties Corporation'];
-
     var wpl = ['New York University',
              ' RCPI Landmark Properties LLC',
              'Trustees Of Columbia',
@@ -297,13 +264,9 @@ auto; -->
              'Bop 245 Park LLC',
              'Solovieff Realty Company',
              'New York-Presbyterian Hospital'];
-
-
     options
             .attr("value", function(d) { console.log(d); return d; })
             .text(function(d) { return d; });
-
-
     // Set up the entity selection.
     var entitySelection = d3.select("#entity_selector_holder")
             .text("Entity")
@@ -314,22 +277,17 @@ auto; -->
             .append("select")
             .attr("name", "entity-selection")
             .attr("id", "entity-type");
-
-
     var entities = entitySelection.selectAll("option")
             .data(mepl)
             .enter()
             .append("option");
-
     entities
             .attr("value", function(d) { console.log(d); return d; })
             .text(function(d, i) { return i + 1 + ". " + d; });
-
     // Set up the changed-state calls.
     dropDown.on("change", criteriaChanged);
     entitySelection.on("change", selectionChanged);
     // We will define these functions a little later on.
-
     // Set up the left-right buttons, using an absolutely positioned div element.
     d3.select("#svg_holder")
             .append("button")
@@ -353,8 +311,6 @@ auto; -->
             .text("→");
     // The left button should be disabled by default.
      document.getElementById("left-button").disabled = true;
-
-
     // Now we can start defining functional events.
     // This event is called whenever the criteria used for ranking is changed.
     function criteriaChanged() {
@@ -396,20 +352,17 @@ auto; -->
         // Now we update the selection using the below.
         selectionChanged();
     }
-
     // This event is called whenever the entity selection is changed, OR the criteria selection is changed.
     // Clicking buttons calls goLeft() or goRight(), which do some checks before running this, too.
     function selectionChanged() {
         var entity_selection = document.getElementById('entity-type');
         var selectedValue = entity_selection.options[entity_selection.selectedIndex].value;
-
         // The below is a standard way of doing this but I fell back to pure JavaScript because I needed the selection
         // and the plot to update when the ranking being used changed. That wouldn't push an event to the d3 stream,
         // so for that case we need to manually inspect...
         // var selectedValue = d3.event.target.value;
         // ...as below.
         var selectedIndex = document.getElementById('entity-type').selectedIndex + 1;
-
         // Reset the buttons if appropriate!
         if(entity_selection.selectedIndex == 20) {
              document.getElementById("right-button").disabled = true;
@@ -421,12 +374,9 @@ auto; -->
              document.getElementById("left-button").disabled = false;
              document.getElementById("right-button").disabled = false;
         }
-
         var old_points = d3.selectAll('.location');
         // Reset the old points.
         old_points.remove();
-
-
         // In order to do any of the rest we need to inspect the ranking type so we map to the correct subdirectory.
         var selection;
         var type_selection = document.getElementById('ranking-type');
@@ -440,12 +390,10 @@ auto; -->
         if (sel == 'Wealthiest') {
             selection = 'wpl';
         }
-
         d3.json("geojson/" + selection + '/' + selectedValue + '.geojson', function (error, ent) {
             // the user clicks on the go left/go right buttons.
             //the name isn't important, but has to match the name
             //you added to the menu's "change" event listener.
-
             // Remove the labels, now we reset them based on the new data.
             d3.select("#title-label").remove();
             svg.append("text")
@@ -458,7 +406,6 @@ auto; -->
                 })
                 .text(function(d) { return selectedValue; })
                 .attr("id", "title-label");
-
             d3.select("#rank-label").remove();
             if (sel == 'Largest') {
                 svg.append("text")
@@ -483,7 +430,6 @@ auto; -->
                         .text(function(d) { return "Ranked " + "#" + selectedIndex + " In Number Of Addresses (" +
                                 ent['properties']['addresses'] + ")"; })
                         .attr("id", "rank-label");
-
             }
             if (sel == 'Wealthiest') {
                 svg.append("text")
@@ -497,8 +443,6 @@ auto; -->
                                 ent['properties']['total value'] + "$)"; })
                         .attr("id", "rank-label");
             }
-
-
             var proj = d3.geo.mercator()
                     .center([-74.04, 40.70])
                     .scale(50000)
@@ -537,7 +481,6 @@ auto; -->
 //                        })();
 //                    }
         });
-
         // We need to use a completely different file, descriptions.json, to populate the description text.
         d3.json("descriptions.json", function (error, desc) {
             console.log(selectedValue);
@@ -558,10 +501,7 @@ auto; -->
                     })
                     .text(desc[selectedValue]);
         });
-
     }
-
-
     // Method called whenever the go-right button is called.
     // Uses some additional logic to wrap entity selection via the menu. Calls selectionChanged().
     function goRight() {
@@ -578,7 +518,6 @@ auto; -->
         entity_selection.selectedIndex = newIndex;
         selectionChanged();
     }
-
     // Method called whenever the go-left button is called.
     // Uses some additional logic to wrap entity selection via the menu. Calls selectionChanged().
     function goLeft() {
@@ -595,6 +534,5 @@ auto; -->
         entity_selection.selectedIndex = newIndex;
         selectionChanged();
     }
-
 </script>
-</body>
+</body
