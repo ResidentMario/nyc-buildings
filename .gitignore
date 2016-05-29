@@ -6,3 +6,5 @@ nyc_rolling_sales.csv
 .DS_Store
 *.txt
 .idea/
+*.dat
+_map.html
